@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>探针型号统计 - 光宽质差感知自智平台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="styles/main.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="components/table-component.js"></script>
+</head>
+<body>
+    <div class="page-header">
+        <div>
+            <div class="page-title">探针型号统计</div>
+            <div class="page-subtitle">分析各型号探针的分布与使用情况</div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">12</div>
+                <div class="stat-label">不同型号</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">5</div>
+                <div class="stat-label">主要厂商</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">687,529</div>
+                <div class="stat-label">设备总数</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="card">
+            <div class="card-title">型号分布统计</div>
+            <div class="chart-container" id="modelChart"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">厂商分布</div>
+            <div class="chart-container" id="makerChart"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">型号详细列表</div>
+        <div id="model-table" class="table-container" style="margin-top: 16px;"></div>
+    </div>
+
+    <script>
+        var modelData = [
+            { maker: '中兴', model: 'ZXHN F7015TV3', hwVersion: 'V3.1', swVersion: 'V4.3.0P1T1', count: 204108 },
+            { maker: '中兴', model: 'ZXHN F660', hwVersion: 'V2.0', swVersion: 'V3.0.0P2T2', count: 35200 },
+            { maker: '中兴', model: 'ZXHN F650(GPON)', hwVersion: 'V1.1', swVersion: 'V2.5.0P1T1', count: 22800 },
+            { maker: '天邑', model: 'TEWA-1100G', hwVersion: 'V1.0', swVersion: 'V1.0.1', count: 89977 },
+            { maker: '天邑', model: 'TEWA-700G', hwVersion: 'V2.0', swVersion: 'V2.0.3', count: 28500 },
+            { maker: '天邑', model: 'TEWA-800G', hwVersion: 'V1.2', swVersion: 'V1.2.0', count: 15300 },
+            { maker: '烽火', model: 'HG5582A', hwVersion: 'V4.2.0', swVersion: 'V4.20.M5000P', count: 88855 },
+            { maker: '烽火', model: 'HG6540A(ONU)', hwVersion: 'V4.1.0', swVersion: 'V4.20.M5000P', count: 49144 },
+            { maker: '烽火', model: 'HG342F(ONU)', hwVersion: 'V1.2.0', swVersion: 'V1.20.M5002', count: 48545 },
+            { maker: '烽火', model: 'AN5506-04', hwVersion: 'V3.0', swVersion: 'V3.10.M5000', count: 18200 },
+            { maker: '华为', model: 'HG8245H', hwVersion: 'V5.0', swVersion: 'V5.20.1', count: 42600 },
+            { maker: '华为', model: 'HG8145V5', hwVersion: 'V3.0', swVersion: 'V3.15.1', count: 31800 },
+            { maker: '创维', model: 'SK-D740', hwVersion: 'V1.0', swVersion: 'V1.0.5', count: 12500 }
+        ];
+
+        var modelTable = new DataTable('model-table', {
+            minWidth: 800,
+            pageSize: 15,
+            columns: [
+                { key: 'maker', label: '厂家名称', flex: 1.0 },
+                { key: 'model', label: '型号', flex: 1.5, render: function(val) { return '<span style="font-family: JetBrains Mono, monospace;">' + val + '</span>'; } },
+                { key: 'hwVersion', label: '硬件版本', flex: 1.0, render: function(val) { return '<span style="font-family: JetBrains Mono, monospace;">' + val + '</span>'; } },
+                { key: 'swVersion', label: '软件版本', flex: 1.2, render: function(val) { return '<span style="font-family: JetBrains Mono, monospace;">' + val + '</span>'; } },
+                { key: 'count', label: '数量', flex: 1.0, render: function(val) { return '<span style="font-weight: 600; color: var(--accent-cyan);">' + val.toLocaleString() + '</span>'; } }
+            ],
+            data: modelData
+        });
+        modelTable.render();
+
+        var modelChart = echarts.init(document.getElementById('modelChart'));
+        var sortedData = modelData.slice().sort(function(a, b) { return a.count - b.count; });
+        var modelOption = {
+            backgroundColor: 'transparent',
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: 'rgba(10, 20, 40, 0.95)',
+                borderColor: 'rgba(0, 212, 255, 0.3)',
+                textStyle: { color: '#e8f4ff' },
+                formatter: function(params) {
+                    return params[0].name + ': ' + params[0].value.toLocaleString();
+                }
+            },
+            grid: { left: 140, right: 40, top: 10, bottom: 30 },
+            xAxis: {
+                type: 'value',
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
+                axisLabel: { color: '#4a6a8a', fontSize: 11, formatter: function(val) { return val >= 10000 ? (val / 10000).toFixed(0) + '万' : val; } }
+            },
+            yAxis: {
+                type: 'category',
+                data: sortedData.map(function(d) { return d.model; }),
+                axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.2)' } },
+                axisLabel: { color: '#7aa2cc', fontSize: 11 }
+            },
+            series: [{
+                type: 'bar',
+                data: sortedData.map(function(d) { return d.count; }),
+                barWidth: '50%',
+                itemStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                        { offset: 0, color: '#00d4ff' },
+                        { offset: 1, color: '#0088ff' }
+                    ]),
+                    borderRadius: [0, 8, 8, 0]
+                }
+            }]
+        };
+        modelChart.setOption(modelOption);
+
+        var makerMap = {};
+        modelData.forEach(function(d) {
+            if (!makerMap[d.maker]) makerMap[d.maker] = 0;
+            makerMap[d.maker] += d.count;
+        });
+        var makerEntries = Object.entries(makerMap).sort(function(a, b) { return b[1] - a[1]; });
+
+        var makerColors = ['#00d4ff', '#a855f7', '#ff6b6b', '#ffd93d', '#00ff88'];
+        var makerChart = echarts.init(document.getElementById('makerChart'));
+        var makerOption = {
+            backgroundColor: 'transparent',
+            tooltip: {
+                trigger: 'item',
+                backgroundColor: 'rgba(10, 20, 40, 0.95)',
+                borderColor: 'rgba(0, 212, 255, 0.3)',
+                textStyle: { color: '#e8f4ff' },
+                formatter: function(params) {
+                    return params.name + ': ' + params.value.toLocaleString() + ' (' + params.percent + '%)';
+                }
+            },
+            series: [{
+                type: 'pie',
+                radius: ['45%', '70%'],
+                center: ['50%', '50%'],
+                avoidLabelOverlap: false,
+                itemStyle: {
+                    borderRadius: 8,
+                    borderColor: '#0a0f1a',
+                    borderWidth: 3
+                },
+                label: {
+                    show: true,
+                    position: 'outside',
+                    color: '#7aa2cc',
+                    fontSize: 13,
+                    formatter: '{b}: {d}%'
+                },
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 20,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 212, 255, 0.3)'
+                    }
+                },
+                data: makerEntries.map(function(entry, i) {
+                    return { value: entry[1], name: entry[0], itemStyle: { color: makerColors[i] } };
+                })
+            }]
+        };
+        makerChart.setOption(makerOption);
+
+        window.addEventListener('resize', function() {
+            modelChart.resize();
+            makerChart.resize();
+        });
+    </script>
+</body>
+</html>

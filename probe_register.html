@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>探针注册明细 - 光宽质差感知自智平台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="styles/main.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="components/table-component.js"></script>
+</head>
+<body>
+    <div class="page-header">
+        <div>
+            <div class="page-title">探针注册明细</div>
+            <div class="page-subtitle">管理探针设备的注册信息与状态</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                导出数据
+            </button>
+            <button class="btn btn-primary">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                新增探针
+            </button>
+        </div>
+    </div>
+
+    <div class="search-bar">
+        <div class="search-input">
+            <input type="text" placeholder="SN码">
+        </div>
+        <div class="search-input">
+            <input type="text" placeholder="账号">
+        </div>
+        <div class="search-input">
+            <select class="search-select">
+                <option value="">地市</option>
+                <option value="changsha">长沙</option>
+                <option value="zhuzhou">株洲</option>
+                <option value="xiangtan">湘潭</option>
+                <option value="hengyang">衡阳</option>
+                <option value="shaoyang">邵阳</option>
+                <option value="yueyang">岳阳</option>
+                <option value="changde">常德</option>
+                <option value="zhangjiajie">张家界</option>
+            </select>
+        </div>
+        <div class="search-input">
+            <select class="search-select">
+                <option value="">带宽</option>
+                <option value="100">100M</option>
+                <option value="200">200M</option>
+                <option value="500">500M</option>
+                <option value="1000">1000M</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1"/><circle cx="6" cy="18" r="1"/></svg>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">1,247</div>
+                <div class="stat-label">已注册探针</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">1,198</div>
+                <div class="stat-label">在线探针</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">49</div>
+                <div class="stat-label">离线探针</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div id="probe-table" class="table-container"></div>
+    </div>
+
+    <script>
+        // 探针注册明细表格数据
+        const probeData = [
+            { sn: 'QKQS428140', code: 'QKQS428140', account: '18062790651', city: '长沙', operator: '电信', vendor: 'HW', model: 'HN8145XR-EPON', hwVersion: '26E0.E', swVersion: 'V5.21.c00S200', dialMode: '路由', bandwidth: '0', status: 'online', updateTime: '2026-05-10 06:08:47', regTime: '2019-07-04 10:17:39' },
+            { sn: 'SZ0309235', code: 'SZ0309235', account: '07319541859', city: '株洲', operator: '电信', vendor: 'FH', model: 'HG5143F(ONU)', hwVersion: 'V4.1.0', swVersion: 'V4.10.M5001', dialMode: '路由', bandwidth: '0', status: 'online', updateTime: '2026-05-12 00:03:35', regTime: '2018-12-14 12:38:58' },
+            { sn: 'XG0820998', code: 'XG0820998', account: '17371214159', city: '湘潭', operator: '电信', vendor: 'ZTE', model: 'ZXHN F650(GPON ONU)', hwVersion: 'V2.0.1', swVersion: 'V2.0.3P1T4', dialMode: '路由', bandwidth: '0', status: 'online', updateTime: '2026-05-10 10:02:28', regTime: '2019-09-26 20:10:41' },
+            { sn: 'QSQ490867', code: 'QSQ490867', account: '07349546950', city: '衡阳', operator: '电信', vendor: 'ZTE', model: 'ZXHN F450', hwVersion: 'V2.0', swVersion: 'V2.0.0P1T3', dialMode: '路由', bandwidth: '0', status: 'online', updateTime: '2026-05-11 10:56:51', regTime: '2019-07-20 14:44:03' },
+            { sn: 'HPQ4843873', code: 'HPQ4843873', account: '18673153692', city: '岳阳', operator: '电信', vendor: 'SCTY', model: 'TEWA-700E', hwVersion: 'V1.0', swVersion: 'Tianyi_V1.0.12', dialMode: '路由', bandwidth: '10', status: 'online', updateTime: '2026-05-11 16:06:05', regTime: '2019-09-27 10:07:48' },
+            { sn: 'JHQ0353413', code: 'JHQ0353413', account: '07386223005', city: '常德', operator: '电信', vendor: 'ZTE', model: 'ZXHN F4600T', hwVersion: 'V1.0', swVersion: 'V4.0.0P1T3', dialMode: '路由', bandwidth: '0', status: 'online', updateTime: '2026-05-11 18:59:59', regTime: '2019-07-30 12:35:44' },
+            { sn: 'QSO433701', code: 'QSO433701', account: '18974327899', city: '张家界', operator: '电信', vendor: 'SCTY', model: 'TEWA-700E', hwVersion: 'V1.0', swVersion: 'Tianyi_V1.0.12', dialMode: '路由', bandwidth: '0', status: 'online', updateTime: '2026-05-11 20:12:33', regTime: '2019-09-27 10:07:48' }
+        ];
+
+        // 初始化探针表格
+        const probeTable = new DataTable('probe-table', {
+            minWidth: 1400,
+            pageSize: 5,
+            columns: [
+                { key: 'sn', label: 'SN码', flex: 1.2, render: (val) => `<span style="font-family: 'JetBrains Mono', monospace;">${val}</span>` },
+                { key: 'code', label: '标识码', flex: 1.2, render: (val) => `<span style="font-family: 'JetBrains Mono', monospace;">${val}</span>` },
+                { key: 'account', label: '账号', flex: 1.3, render: (val) => `<span style="font-family: 'JetBrains Mono', monospace;">${val}</span>` },
+                { key: 'city', label: '地市', flex: 0.8 },
+                { key: 'operator', label: '运营商', flex: 0.8 },
+                { key: 'vendor', label: '厂家', flex: 0.8 },
+                { key: 'model', label: '型号', flex: 1.2 },
+                { key: 'hwVersion', label: '硬件版本', flex: 0.8 },
+                { key: 'swVersion', label: '软件版本', flex: 1.2 },
+                { key: 'dialMode', label: '拨号方式', flex: 0.8 },
+                { key: 'bandwidth', label: '带宽', flex: 0.6 },
+                { key: 'status', label: '在线状态', flex: 0.9, render: (val) => `<span class="status-badge ${val}"><span class="status-dot"></span>${val === 'online' ? '在线' : '离线'}</span>` },
+                { key: 'updateTime', label: '状态更新时间', flex: 1.3 },
+                { key: 'regTime', label: '注册时间', flex: 1.3 },
+                { key: 'actions', label: '操作', flex: 0.9, render: () => `<div class="action-links"><button class="action-btn" title="编辑"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="action-btn" title="测试"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button></div>` }
+            ],
+            data: probeData
+        });
+        probeTable.render();
+    </script>
+</body>
+</html>

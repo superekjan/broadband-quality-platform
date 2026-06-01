@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试目标组 - 光宽质差感知自智平台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <link href="styles/main.css" rel="stylesheet">
+<script src="components/table-component.js"></script>
+    </head>
+<body>
+    <div class="page-header">
+        <div>
+            <div class="page-title">测试目标组</div>
+            <div class="page-subtitle">管理测试目标分组配置</div>
+        </div>
+        <button class="btn btn-primary" onclick="openAddModal()">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            新建目标组
+        </button>
+    </div>
+
+    <div class="search-bar">
+        <div class="search-input">
+            <input type="text" placeholder="测试地址">
+        </div>
+        <div class="search-input">
+            <input type="text" placeholder="目标名称">
+        </div>
+        <div class="search-input">
+            <input type="text" placeholder="测试类型">
+        </div>
+        <div class="search-input">
+            <input type="text" placeholder="任务说明">
+        </div>
+    </div>
+
+    <div class="card">
+        <div id="groups-table" class="table-container"></div>
+    </div>
+
+    <div class="modal-overlay" id="addModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">新建目标组</div>
+                <button class="modal-close" onclick="closeModal()">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <form id="addForm">
+                <div class="form-group">
+                    <label class="form-label">组名称</label>
+                    <input type="text" class="form-input" placeholder="请输入目标组名称">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">描述</label>
+                    <input type="text" class="form-input" placeholder="请输入目标组描述">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">选择目标</label>
+                    <div class="targets-select">
+                        <div class="target-checkbox">
+                            <input type="checkbox" id="target1">
+                            <label for="target1">百度首页</label>
+                        </div>
+                        <div class="target-checkbox">
+                            <input type="checkbox" id="target2">
+                            <label for="target2">腾讯视频</label>
+                        </div>
+                        <div class="target-checkbox">
+                            <input type="checkbox" id="target3">
+                            <label for="target3">王者荣耀</label>
+                        </div>
+                        <div class="target-checkbox">
+                            <input type="checkbox" id="target4">
+                            <label for="target4">IPv6测试节点</label>
+                        </div>
+                        <div class="target-checkbox">
+                            <input type="checkbox" id="target5">
+                            <label for="target5">公共DNS</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">确认创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 测试目标组数据
+        const groupsData = [
+            { id: 1, name: '不可用时长', desc: '不可用时长监测目标组' },
+            { id: 2, name: '自智重启', desc: '自智重启策略目标组' }
+        ];
+
+        // 初始化测试目标组表格
+        const groupsTable = new DataTable('groups-table', {
+            minWidth: 600,
+            pageSize: 5,
+            columns: [
+                { key: 'name', label: '组名', flex: 1.5 },
+                { key: 'desc', label: '描述', flex: 3 },
+                { key: 'actions', label: '操作', flex: 1, render: () => `<div class="action-links"><a href="#" style="color: var(--accent-cyan); text-decoration: none; font-size: 13px;">编辑</a><a href="#" style="color: var(--accent-red); text-decoration: none; font-size: 13px;">删除</a></div>` }
+            ],
+            data: groupsData
+        });
+        groupsTable.render();
+
+        function openAddModal() {
+            document.getElementById('addModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('addModal').classList.remove('show');
+        }
+
+        document.getElementById('addForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('目标组创建成功');
+            closeModal();
+        });
+    </script>
+</body>
+</html>

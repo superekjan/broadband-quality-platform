@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - 光宽质差感知自智平台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #030712;
+            --bg-secondary: #0a1628;
+            --bg-card: rgba(10, 22, 40, 0.9);
+            --border-color: rgba(0, 200, 255, 0.12);
+            --text-primary: #e8f4ff;
+            --text-secondary: #7aa2cc;
+            --text-muted: #4a6a8a;
+            --accent-cyan: #00d4ff;
+            --accent-blue: #0088ff;
+            --accent-purple: #a855f7;
+            --accent-green: #00ff88;
+            --accent-yellow: #ffd000;
+            --accent-red: #ff3366;
+            --glow-cyan: 0 0 30px rgba(0, 212, 255, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 0%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(0, 136, 255, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .screen-grid {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: grid;
+            grid-template-rows: 1fr auto;
+            z-index: 1;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 320px 1fr 320px;
+            gap: 16px;
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        .left-panel, .center-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        .panel-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .panel-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+            opacity: 0.8;
+        }
+
+        .panel-title {
+            font-size: 13px; font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title svg {
+            width: 14px; height: 14px;
+            stroke: var(--accent-cyan); stroke-width: 2; fill: none;
+        }
+
+        .chart-container {
+            width: 100%;
+            min-height: 0;
+        }
+
+        .map-container {
+            flex: 2;
+            min-height: 0;
+            position: relative;
+        }
+
+        #guangdongMap {
+            width: 100%; height: 100%;
+            border-radius: 12px;
+        }
+
+        .footer-bar {
+            height: 40px;
+            background: rgba(10, 22, 40, 0.9);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            font-size: 11px; color: var(--text-muted);
+        }
+
+        .footer-left, .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        @media (max-width: 1400px) {
+            .main-content { grid-template-columns: 280px 1fr 280px; }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+                overflow-y: auto;
+            }
+        }
+
+        </style>
+</head>
+<body>
+    <div class="screen-grid">
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="panel-card">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        半年内网络感知趋势
+                    </div>
+                    <div class="chart-container" id="trendChart" style="height: 220px;"></div>
+                </div>
+
+                <div class="panel-card">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                        探针分布
+                    </div>
+                    <div class="chart-container" id="probePieChart" style="height: 220px;"></div>
+                </div>
+            </div>
+
+            <div class="center-panel">
+                <div class="panel-card" style="flex: 0 0 auto;">
+                    <div style="display: flex; justify-content: space-around; align-items: center;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">电信</div>
+                            <div style="display: flex; gap: 20px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">网页</div>
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">90.66</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">视频</div>
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">96.32</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">游戏</div>
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">97.63</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="width: 1px; height: 60px; background: var(--border-color);"></div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">移动</div>
+                            <div style="display: flex; gap: 20px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">网页</div>
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">89.17</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">视频</div>
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">94.57</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">游戏</div>
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">96.04</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="map-container">
+                    <div id="guangdongMap"></div>
+                </div>
+
+                <div class="panel-card">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                        地市整体感知
+                    </div>
+                    <div class="chart-container" id="cityBarChart" style="height: 160px;"></div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="panel-card">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+                        网页感知
+                    </div>
+                    <div class="chart-container" id="webBarChart" style="height: 140px;"></div>
+                </div>
+
+                <div class="panel-card">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        视频感知
+                    </div>
+                    <div class="chart-container" id="videoBarChart" style="height: 140px;"></div>
+                </div>
+
+                <div class="panel-card">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
+                        游戏感知
+                    </div>
+                    <div class="chart-container" id="gameBarChart" style="height: 140px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var hunanMapChart = echarts.init(document.getElementById('guangdongMap'));
+            fetch('https://geo.datav.aliyun.com/areas_v3/bound/430000_full.json')
+                .then(function(response) { return response.json(); })
+                .then(function(geoJson) {
+                    echarts.registerMap('湖南', geoJson);
+
+                    var hnCityData = [
+                        { name: '长沙市', value: 89 },
+                        { name: '株洲市', value: 85 },
+                        { name: '湘潭市', value: 86 },
+                        { name: '衡阳市', value: 82 },
+                        { name: '邵阳市', value: 78 },
+                        { name: '岳阳市', value: 84 },
+                        { name: '常德市', value: 83 },
+                        { name: '张家界市', value: 80 },
+                        { name: '益阳市', value: 79 },
+                        { name: '郴州市', value: 81 },
+                        { name: '永州市', value: 77 },
+                        { name: '怀化市', value: 75 },
+                        { name: '娄底市', value: 76 },
+                        { name: '湘西土家族苗族自治州', value: 73 }
+                    ];
+
+                    var mapOption = {
+                        backgroundColor: 'transparent',
+                        tooltip: {
+                            trigger: 'item',
+                            backgroundColor: 'rgba(10, 22, 40, 0.95)',
+                            borderColor: 'rgba(0, 212, 255, 0.3)',
+                            textStyle: { color: '#e8f4ff', fontSize: 13 },
+                            formatter: function(params) {
+                                if (params.value !== undefined) {
+                                    var score = params.value;
+                                    var level = score >= 85 ? '优' : score >= 70 ? '良' : '差';
+                                    var levelColor = score >= 85 ? '#00d4ff' : score >= 70 ? '#4a9eff' : '#2a5a8a';
+                                    return '<strong>' + params.name + '</strong><br/>QoE分值：<span style="color:' + levelColor + ';font-weight:bold;font-size:16px;">' + score.toFixed(1) + '</span><br/><span style="color:#7aa2cc;font-size:11px;">评级：' + level + '</span>';
+                                }
+                                return params.name;
+                            }
+                        },
+                        visualMap: {
+                            show: true,
+                            min: 0,
+                            max: 100,
+                            orient: 'horizontal',
+                            left: 20,
+                            top: 20,
+                            text: ['优', '差'],
+                            textStyle: { color: '#7aa2cc', fontSize: 12 },
+                            inRange: {
+                                color: ['#0d2a4a', '#0a4080', '#0060b0', '#0080d0', '#00a0f0', '#00d4ff']
+                            },
+                            itemWidth:10, 
+                            itemHeight:100,
+                            calculable: false
+                        },
+                        series: [{
+                            name: 'QoE感知评分',
+                            type: 'map',
+                            map: '湖南',
+                            roam: true,
+                            zoom: 1.1,
+                            center: [112.0, 27.5],
+                            label: {
+                                show: true,
+                                color: '#FFFFFF',
+                                fontSize: 10,
+                                formatter: function(params) {
+                                    return params.name.replace('市', '').replace('土家族苗族自治州', '');
+                                },
+                                textStyle: {
+                                    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+                                    textShadowBlur: 5,
+                                    textShadowOffsetX: 2,
+                                    textShadowOffsetY: 2
+                                }
+                            },
+                            emphasis: {
+                                label: {
+                                    show: true,
+                                    color: '#fff',
+                                    fontSize: 14,
+                                    fontWeight: 'bold'
+                                },
+                                itemStyle: {
+                                    areaColor: '#0055aa',
+                                    shadowBlur: 15,
+                                    shadowColor: 'rgba(0, 150, 255, 0.4)'
+                                }
+                            },
+                            itemStyle: {
+                                borderColor: 'rgba(0, 212, 255, 0.25)',
+                                borderWidth: 1,
+                                areaColor: '#0a2040'
+                            },
+                            data: hnCityData
+                        }]
+                    };
+                    hunanMapChart.setOption(mapOption);
+
+                    window.addEventListener('resize', function() {
+                        hunanMapChart.resize();
+                    });
+                });
+
+            var trendChart = echarts.init(document.getElementById('trendChart'));
+            var trendOption = {
+                backgroundColor: 'transparent',
+                grid: { left: 40, right: 20, top: 20, bottom: 30 },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(10, 22, 40, 0.95)',
+                    borderColor: 'rgba(0, 212, 255, 0.3)',
+                    textStyle: { color: '#e8f4ff' },
+                    formatter: function(params) {
+                        return params[0].name + '<br/><span style="color:#00d4ff;font-weight:bold;">' + params[0].value.toFixed(1) + '</span>';
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['2025-12', '2026-01', '2026-02', '2026-03', '2026-04', '2026-05'],
+                    axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.2)' } },
+                    axisLabel: { color: '#4a6a8a', fontSize: 10 }
+                },
+                yAxis: {
+                    type: 'value',
+                    max: 100,
+                    axisLine: { show: false },
+                    axisTick: { show: false },
+                    splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
+                    axisLabel: { color: '#4a6a8a', fontSize: 10 }
+                },
+                series: [{
+                    type: 'line',
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 6,
+                    lineStyle: { color: '#00d4ff', width: 2 },
+                    itemStyle: { color: '#00d4ff', borderColor: '#050810', borderWidth: 2 },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(0, 212, 255, 0.3)' },
+                            { offset: 1, color: 'rgba(0, 212, 255, 0.02)' }
+                        ])
+                    },
+                    data: [85, 87, 86, 89, 88, 90]
+                }]
+            };
+            trendChart.setOption(trendOption);
+
+            var probePieChart = echarts.init(document.getElementById('probePieChart'));
+            var probePieOption = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(10, 22, 40, 0.95)',
+                    borderColor: 'rgba(0, 212, 255, 0.3)',
+                    textStyle: { color: '#e8f4ff' }
+                },
+                legend: {
+                    orient: 'horizontal',
+                    bottom: 0,
+                    textStyle: { color: '#7aa2cc', fontSize: 10 },
+                    itemWidth: 10,
+                    itemHeight: 10
+                },
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '65%'],
+                    center: ['50%', '45%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 6,
+                        borderColor: '#0a0f1a',
+                        borderWidth: 2
+                    },
+                    label: { show: false },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: 14,
+                            fontWeight: 'bold',
+                            color: '#e8f4ff'
+                        }
+                    },
+                    data: [
+                        { value: 285, name: '长沙', itemStyle: { color: '#00d4ff' } },
+                        { value: 198, name: '株洲', itemStyle: { color: '#0088ff' } },
+                        { value: 156, name: '湘潭', itemStyle: { color: '#a855f7' } },
+                        { value: 142, name: '衡阳', itemStyle: { color: '#00ff88' } },
+                        { value: 118, name: '岳阳', itemStyle: { color: '#ffd000' } },
+                        { value: 265, name: '其他', itemStyle: { color: '#4a6a8a' } }
+                    ]
+                }]
+            };
+            probePieChart.setOption(probePieOption);
+
+            var cityBarChart = echarts.init(document.getElementById('cityBarChart'));
+            var cityBarOption = {
+                backgroundColor: 'transparent',
+                grid: { left: 50, right: 20, top: 10, bottom: 30 },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(10, 22, 40, 0.95)',
+                    borderColor: 'rgba(0, 212, 255, 0.3)',
+                    textStyle: { color: '#e8f4ff' },
+                    formatter: function(params) {
+                        return params[0].name + '<br/><span style="color:#00d4ff;font-weight:bold;">' + params[0].value.toFixed(1) + '</span>';
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['长沙', '株洲', '湘潭', '衡阳', '邵阳', '岳阳', '常德', '张家界'],
+                    axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.2)' } },
+                    axisLabel: { color: '#4a6a8a', fontSize: 10 }
+                },
+                yAxis: {
+                    type: 'value',
+                    max: 100,
+                    axisLine: { show: false },
+                    axisTick: { show: false },
+                    splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
+                    axisLabel: { color: '#4a6a8a', fontSize: 10 }
+                },
+                series: [{
+                    type: 'bar',
+                    barWidth: '50%',
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#00d4ff' },
+                            { offset: 1, color: '#0055aa' }
+                        ]),
+                        borderRadius: [4, 4, 0, 0]
+                    },
+                    data: [89, 85, 86, 82, 78, 84, 83, 80]
+                }]
+            };
+            cityBarChart.setOption(cityBarOption);
+
+            function createBarChart(id, data, colors) {
+                var chart = echarts.init(document.getElementById(id));
+                var option = {
+                    backgroundColor: 'transparent',
+                    grid: { left: 50, right: 20, top: 10, bottom: 30 },
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: 'rgba(10, 22, 40, 0.95)',
+                        borderColor: 'rgba(0, 212, 255, 0.3)',
+                        textStyle: { color: '#e8f4ff' },
+                        formatter: function(params) {
+                            var res = params[0].name + '<br/>';
+                            params.forEach(function(p) {
+                                res += '<span style="color:' + p.color + ';">●</span> ' + p.seriesName + ': <span style="color:#00d4ff;font-weight:bold;">' + p.value.toFixed(1) + '</span><br/>';
+                            });
+                            return res;
+                        }
+                    },
+                    legend: {
+                        top: 0,
+                        right: 0,
+                        textStyle: { color: '#7aa2cc', fontSize: 10 },
+                        itemWidth: 10,
+                        itemHeight: 10
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: ['长沙', '株洲', '湘潭', '衡阳', '邵阳', '岳阳', '常德', '张家界'],
+                        axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.2)' } },
+                        axisLabel: { color: '#4a6a8a', fontSize: 10 }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        max: 100,
+                        axisLine: { show: false },
+                        axisTick: { show: false },
+                        splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
+                        axisLabel: { color: '#4a6a8a', fontSize: 10 }
+                    },
+                    series: [
+                        {
+                            name: '电信',
+                            type: 'bar',
+                            barWidth: '30%',
+                            barGap: '20%',
+                            itemStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                    { offset: 0, color: colors[0] },
+                                    { offset: 1, color: colors[0] + '66' }
+                                ]),
+                                borderRadius: [3, 3, 0, 0]
+                            },
+                            data: data[0]
+                        },
+                        {
+                            name: '移动',
+                            type: 'bar',
+                            barWidth: '30%',
+                            itemStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                    { offset: 0, color: colors[1] },
+                                    { offset: 1, color: colors[1] + '66' }
+                                ]),
+                                borderRadius: [3, 3, 0, 0]
+                            },
+                            data: data[1]
+                        }
+                    ]
+                };
+                chart.setOption(option);
+                return chart;
+            }
+
+            var webBarChart = createBarChart('webBarChart',
+                [[92, 88, 87, 85, 80, 84, 83, 81], [91, 87, 86, 84, 79, 83, 82, 80]],
+                ['#00d4ff', '#a855f7']);
+
+            var videoBarChart = createBarChart('videoBarChart',
+                [[95, 92, 91, 89, 85, 90, 88, 86], [94, 91, 90, 88, 84, 89, 87, 85]],
+                ['#00d4ff', '#a855f7']);
+
+            var gameBarChart = createBarChart('gameBarChart',
+                [[97, 94, 93, 91, 87, 92, 90, 88], [96, 93, 92, 90, 86, 91, 89, 87]],
+                ['#00d4ff', '#a855f7']);
+
+            window.addEventListener('resize', function() {
+                trendChart.resize();
+                probePieChart.resize();
+                cityBarChart.resize();
+                webBarChart.resize();
+                videoBarChart.resize();
+                gameBarChart.resize();
+            });
+        });
+    </script>
+</body>
+</html>
