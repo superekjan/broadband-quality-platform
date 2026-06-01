@@ -265,29 +265,101 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var hunanMapChart = echarts.init(document.getElementById('guangdongMap'));
-            fetch('https://geo.datav.aliyun.com/areas_v3/bound/430000_full.json')
-                .then(function(response) { return response.json(); })
-                .then(function(geoJson) {
-                    echarts.registerMap('湖南', geoJson);
+            
+            var geoJsonUrls = [
+                'https://geo.datav.aliyun.com/areas_v3/bound/430000_full.json',
+                'https://geo.datav.aliyun.com/rect_100_compact/430000'
+            ];
+            
+            var loadMapData = function(urlIndex) {
+                if (urlIndex >= geoJsonUrls.length) {
+                    console.warn('所有地图数据源加载失败，显示备用视图');
+                    showFallbackMap();
+                    return;
+                }
+                
+                fetch(geoJsonUrls[urlIndex])
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(function(geoJson) {
+                        echarts.registerMap('湖南', geoJson);
+                        initHunanMap(geoJson);
+                    })
+                    .catch(function(error) {
+                        console.warn('地图数据源 ' + (urlIndex + 1) + ' 加载失败: ' + error.message);
+                        loadMapData(urlIndex + 1);
+                    });
+            };
+            
+            var showFallbackMap = function() {
+                var fallbackOption = {
+                    backgroundColor: 'transparent',
+                    title: {
+                        text: '湖南省市州分布',
+                        subtext: '地图数据加载中...',
+                        textStyle: { color: '#00d4ff', fontSize: 16 },
+                        subtextStyle: { color: '#7aa2cc', fontSize: 12 },
+                        left: 'center',
+                        top: 20
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: ['长沙市', '株洲市', '湘潭市', '衡阳市', '邵阳市', '岳阳市', '常德市', '张家界市', '益阳市', '郴州市', '永州市', '怀化市', '娄底市', '湘西州'],
+                        axisLabel: { color: '#7aa2cc', fontSize: 10, interval: 0, rotate: 45 },
+                        axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: { color: '#7aa2cc' },
+                        axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
+                        splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } }
+                    },
+                    series: [{
+                        name: 'QoE分值',
+                        type: 'bar',
+                        data: [89, 85, 86, 82, 78, 84, 83, 80, 79, 81, 77, 75, 76, 73],
+                        itemStyle: {
+                            color: function(params) {
+                                var colorList = ['#00d4ff', '#00b8e6', '#0099cc', '#0088ff', '#0077cc', '#0066bb', '#0055aa', '#004499', '#003388', '#002277', '#001166', '#001055', '#000944', '#000833'];
+                                return colorList[params.dataIndex];
+                            },
+                            borderRadius: [4, 4, 0, 0]
+                        },
+                        label: { show: true, color: '#fff', fontSize: 10, position: 'top' }
+                    }],
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: 'rgba(10, 22, 40, 0.95)',
+                        borderColor: 'rgba(0, 212, 255, 0.3)',
+                        textStyle: { color: '#e8f4ff' }
+                    }
+                };
+                hunanMapChart.setOption(fallbackOption);
+            };
+            
+            var initHunanMap = function(geoJson) {
+                var hnCityData = [
+                    { name: '长沙市', value: 89 },
+                    { name: '株洲市', value: 85 },
+                    { name: '湘潭市', value: 86 },
+                    { name: '衡阳市', value: 82 },
+                    { name: '邵阳市', value: 78 },
+                    { name: '岳阳市', value: 84 },
+                    { name: '常德市', value: 83 },
+                    { name: '张家界市', value: 80 },
+                    { name: '益阳市', value: 79 },
+                    { name: '郴州市', value: 81 },
+                    { name: '永州市', value: 77 },
+                    { name: '怀化市', value: 75 },
+                    { name: '娄底市', value: 76 },
+                    { name: '湘西土家族苗族自治州', value: 73 }
+                ];
 
-                    var hnCityData = [
-                        { name: '长沙市', value: 89 },
-                        { name: '株洲市', value: 85 },
-                        { name: '湘潭市', value: 86 },
-                        { name: '衡阳市', value: 82 },
-                        { name: '邵阳市', value: 78 },
-                        { name: '岳阳市', value: 84 },
-                        { name: '常德市', value: 83 },
-                        { name: '张家界市', value: 80 },
-                        { name: '益阳市', value: 79 },
-                        { name: '郴州市', value: 81 },
-                        { name: '永州市', value: 77 },
-                        { name: '怀化市', value: 75 },
-                        { name: '娄底市', value: 76 },
-                        { name: '湘西土家族苗族自治州', value: 73 }
-                    ];
-
-                    var mapOption = {
+                var mapOption = {
                         backgroundColor: 'transparent',
                         tooltip: {
                             trigger: 'item',
@@ -367,7 +439,9 @@
                     window.addEventListener('resize', function() {
                         hunanMapChart.resize();
                     });
-                });
+                };
+            
+            loadMapData(0);
 
             var trendChart = echarts.init(document.getElementById('trendChart'));
             var trendOption = {
