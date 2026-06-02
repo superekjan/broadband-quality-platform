@@ -55,22 +55,22 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             display: grid;
-            grid-template-rows: 1fr auto;
+            grid-template-rows: 1fr;
             z-index: 1;
         }
 
         .main-content {
             display: grid;
             grid-template-columns: 320px 1fr 320px;
-            gap: 16px;
-            padding: 16px;
+            gap: 12px;
+            padding: 12px;
             overflow: hidden;
         }
 
         .left-panel, .center-panel, .right-panel {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
             overflow: hidden;
         }
 
@@ -78,7 +78,7 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 16px;
+            padding: 14px;
             position: relative;
             overflow: hidden;
             flex: 1;
@@ -97,39 +97,67 @@
         }
 
         .panel-title {
-            font-size: 13px; font-weight: 600;
+            font-size: 12px;
+            font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 12px;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .panel-title svg {
-            width: 14px; height: 14px;
-            stroke: var(--accent-cyan); stroke-width: 2; fill: none;
+        .panel-title-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
+
+        .panel-title-icon svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        .icon-trend svg { stroke: var(--accent-cyan); }
+        .icon-probe svg { stroke: var(--accent-purple); }
+        .icon-city svg { stroke: var(--accent-green); }
+        .icon-daily svg { stroke: var(--accent-cyan); }
+        .icon-weekly svg { stroke: var(--accent-purple); }
+        .icon-monthly svg { stroke: var(--accent-green); }
 
         .chart-container {
             width: 100%;
             min-height: 0;
+            flex: 1;
         }
 
         .map-container {
-            flex: 2;
+            flex: 2.5;
             min-height: 0;
             position: relative;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            overflow: hidden;
+        }
+
+        .map-container::before {
+            display: none;
         }
 
         #guangdongMap {
             width: 100%; height: 100%;
-            border-radius: 12px;
         }
 
         .footer-bar {
-            height: 40px;
+            height: 36px;
             background: rgba(10, 22, 40, 0.9);
             border-top: 1px solid var(--border-color);
             display: flex;
@@ -156,8 +184,7 @@
                 overflow-y: auto;
             }
         }
-
-        </style>
+    </style>
 </head>
 <body>
     <div class="screen-grid">
@@ -165,98 +192,70 @@
             <div class="left-panel">
                 <div class="panel-card">
                     <div class="panel-title">
-                        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        半年内网络感知趋势
+                        <div class="panel-title-icon icon-trend">
+                            <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                        </div>
+                        全省不可用时长趋势
                     </div>
-                    <div class="chart-container" id="trendChart" style="height: 220px;"></div>
+                    <div class="chart-container" id="trendChart"></div>
                 </div>
 
                 <div class="panel-card">
                     <div class="panel-title">
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                        <div class="panel-title-icon icon-probe">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                        </div>
                         探针分布
                     </div>
-                    <div class="chart-container" id="probePieChart" style="height: 220px;"></div>
+                    <div class="chart-container" id="probePieChart"></div>
                 </div>
             </div>
 
             <div class="center-panel">
-                <div class="panel-card" style="flex: 0 0 auto;">
-                    <div style="display: flex; justify-content: space-around; align-items: center;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">电信</div>
-                            <div style="display: flex; gap: 20px;">
-                                <div style="text-align: center;">
-                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">网页</div>
-                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">90.66</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">视频</div>
-                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">96.32</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">游戏</div>
-                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">97.63</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="width: 1px; height: 60px; background: var(--border-color);"></div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">移动</div>
-                            <div style="display: flex; gap: 20px;">
-                                <div style="text-align: center;">
-                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">网页</div>
-                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">89.17</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">视频</div>
-                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">94.57</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">游戏</div>
-                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent-cyan);">96.04</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="map-container">
                     <div id="guangdongMap"></div>
                 </div>
 
                 <div class="panel-card">
                     <div class="panel-title">
-                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-                        地市整体感知
+                        <div class="panel-title-icon icon-city">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
+                        </div>
+                        地市不可用时长统计
                     </div>
-                    <div class="chart-container" id="cityBarChart" style="height: 160px;"></div>
+                    <div class="chart-container" id="cityBarChart"></div>
                 </div>
             </div>
 
             <div class="right-panel">
                 <div class="panel-card">
                     <div class="panel-title">
-                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
-                        网页感知
+                        <div class="panel-title-icon icon-daily">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        日自智触发统计
                     </div>
-                    <div class="chart-container" id="webBarChart" style="height: 140px;"></div>
+                    <div class="chart-container" id="dailyChart"></div>
                 </div>
 
                 <div class="panel-card">
                     <div class="panel-title">
-                        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                        视频感知
+                        <div class="panel-title-icon icon-weekly">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </div>
+                        周自智触发统计
                     </div>
-                    <div class="chart-container" id="videoBarChart" style="height: 140px;"></div>
+                    <div class="chart-container" id="weeklyChart"></div>
                 </div>
 
                 <div class="panel-card">
                     <div class="panel-title">
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
-                        游戏感知
+                        <div class="panel-title-icon icon-monthly">
+                            <svg viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+                        </div>
+                        月自智触发统计
                     </div>
-                    <div class="chart-container" id="gameBarChart" style="height: 140px;"></div>
+                    <div class="chart-container" id="monthlyChart"></div>
                 </div>
             </div>
         </div>
@@ -310,14 +309,14 @@
                             max: 100,
                             orient: 'horizontal',
                             left: 20,
-                            top: 20,
+                            bottom: 10,
                             text: ['优', '差'],
-                            textStyle: { color: '#7aa2cc', fontSize: 12 },
+                            textStyle: { color: '#7aa2cc', fontSize: 11 },
                             inRange: {
                                 color: ['#0d2a4a', '#0a4080', '#0060b0', '#0080d0', '#00a0f0', '#00d4ff']
                             },
-                            itemWidth:10, 
-                            itemHeight:100,
+                            itemWidth: 10,
+                            itemHeight: 80,
                             calculable: false
                         },
                         series: [{
@@ -334,12 +333,10 @@
                                 formatter: function(params) {
                                     return params.name.replace('市', '').replace('土家族苗族自治州', '');
                                 },
-                                textStyle: {
-                                    textShadowColor: 'rgba(0, 0, 0, 0.8)',
-                                    textShadowBlur: 5,
-                                    textShadowOffsetX: 2,
-                                    textShadowOffsetY: 2
-                                }
+                                textShadowColor: 'rgba(0, 0, 0, 0.8)',
+                                textShadowBlur: 5,
+                                textShadowOffsetX: 2,
+                                textShadowOffsetY: 2
                             },
                             emphasis: {
                                 label: {
@@ -372,44 +369,45 @@
             var trendChart = echarts.init(document.getElementById('trendChart'));
             var trendOption = {
                 backgroundColor: 'transparent',
-                grid: { left: 40, right: 20, top: 20, bottom: 30 },
+                grid: { left: 48, right: 16, top: 16, bottom: 28 },
                 tooltip: {
                     trigger: 'axis',
                     backgroundColor: 'rgba(10, 22, 40, 0.95)',
                     borderColor: 'rgba(0, 212, 255, 0.3)',
-                    textStyle: { color: '#e8f4ff' },
+                    textStyle: { color: '#e8f4ff', fontSize: 12 },
                     formatter: function(params) {
-                        return params[0].name + '<br/><span style="color:#00d4ff;font-weight:bold;">' + params[0].value.toFixed(1) + '</span>';
+                        return params[0].name + '<br/><span style="color:#00d4ff;font-weight:bold;">' + params[0].value + '</span> 小时';
                     }
                 },
                 xAxis: {
                     type: 'category',
                     data: ['2025-12', '2026-01', '2026-02', '2026-03', '2026-04', '2026-05'],
-                    axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.2)' } },
+                    axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.15)' } },
                     axisLabel: { color: '#4a6a8a', fontSize: 10 }
                 },
                 yAxis: {
                     type: 'value',
-                    max: 100,
+                    name: 'h',
+                    nameTextStyle: { color: '#4a6a8a', fontSize: 10 },
                     axisLine: { show: false },
                     axisTick: { show: false },
-                    splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
+                    splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.08)' } },
                     axisLabel: { color: '#4a6a8a', fontSize: 10 }
                 },
                 series: [{
                     type: 'line',
                     smooth: true,
                     symbol: 'circle',
-                    symbolSize: 6,
+                    symbolSize: 5,
                     lineStyle: { color: '#00d4ff', width: 2 },
                     itemStyle: { color: '#00d4ff', borderColor: '#050810', borderWidth: 2 },
                     areaStyle: {
                         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                            { offset: 0, color: 'rgba(0, 212, 255, 0.3)' },
+                            { offset: 0, color: 'rgba(0, 212, 255, 0.25)' },
                             { offset: 1, color: 'rgba(0, 212, 255, 0.02)' }
                         ])
                     },
-                    data: [85, 87, 86, 89, 88, 90]
+                    data: [1250, 1180, 1320, 1090, 1150, 980]
                 }]
             };
             trendChart.setOption(trendOption);
@@ -421,30 +419,33 @@
                     trigger: 'item',
                     backgroundColor: 'rgba(10, 22, 40, 0.95)',
                     borderColor: 'rgba(0, 212, 255, 0.3)',
-                    textStyle: { color: '#e8f4ff' }
+                    textStyle: { color: '#e8f4ff', fontSize: 12 },
+                    formatter: '{b}: {c} ({d}%)'
                 },
                 legend: {
                     orient: 'horizontal',
-                    bottom: 0,
-                    textStyle: { color: '#7aa2cc', fontSize: 10 },
-                    itemWidth: 10,
-                    itemHeight: 10
+                    bottom: 15,
+                    left: 'center',
+                    textStyle: { color: '#7aa2cc', fontSize: 9 },
+                    itemWidth: 8,
+                    itemHeight: 8,
+                    itemGap: 6
                 },
                 series: [{
                     type: 'pie',
-                    radius: ['40%', '65%'],
-                    center: ['50%', '45%'],
+                    radius: ['35%', '60%'],
+                    center: ['50%', '35%'],
                     avoidLabelOverlap: false,
                     itemStyle: {
-                        borderRadius: 6,
+                        borderRadius: 4,
                         borderColor: '#0a0f1a',
-                        borderWidth: 2
+                        borderWidth: 1
                     },
                     label: { show: false },
                     emphasis: {
                         label: {
                             show: true,
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: 'bold',
                             color: '#e8f4ff'
                         }
@@ -454,69 +455,108 @@
                         { value: 198, name: '株洲', itemStyle: { color: '#0088ff' } },
                         { value: 156, name: '湘潭', itemStyle: { color: '#a855f7' } },
                         { value: 142, name: '衡阳', itemStyle: { color: '#00ff88' } },
-                        { value: 118, name: '岳阳', itemStyle: { color: '#ffd000' } },
-                        { value: 265, name: '其他', itemStyle: { color: '#4a6a8a' } }
+                        { value: 128, name: '邵阳', itemStyle: { color: '#ffd000' } },
+                        { value: 118, name: '岳阳', itemStyle: { color: '#ff6b6b' } },
+                        { value: 105, name: '常德', itemStyle: { color: '#4ecdc4' } },
+                        { value: 110, name: '郴州', itemStyle: { color: '#ffeaa7' } },
+                        { value: 102, name: '永州', itemStyle: { color: '#dfe6e9' } },
+                        { value: 95, name: '益阳', itemStyle: { color: '#96ceb4' } },
+                        { value: 96, name: '娄底', itemStyle: { color: '#6c5ce7' } },
+                        { value: 89, name: '张家界', itemStyle: { color: '#45b7d1' } },
+                        { value: 88, name: '怀化', itemStyle: { color: '#fd79a8' } },
+                        { value: 78, name: '湘西', itemStyle: { color: '#55a3e8' } }
                     ]
                 }]
             };
             probePieChart.setOption(probePieOption);
 
             var cityBarChart = echarts.init(document.getElementById('cityBarChart'));
+            var cityData = [
+                { name: '长沙', value: 326 },
+                { name: '株洲', value: 285 },
+                { name: '湘潭', value: 268 },
+                { name: '衡阳', value: 245 },
+                { name: '岳阳', value: 218 },
+                { name: '常德', value: 196 },
+                { name: '邵阳', value: 182 },
+                { name: '郴州', value: 165 },
+                { name: '永州', value: 152 },
+                { name: '益阳', value: 138 },
+                { name: '娄底', value: 125 },
+                { name: '怀化', value: 108 },
+                { name: '张家界', value: 92 },
+                { name: '湘西', value: 78 }
+            ];
             var cityBarOption = {
                 backgroundColor: 'transparent',
-                grid: { left: 50, right: 20, top: 10, bottom: 30 },
+                grid: { left: 48, right: 16, top: 8, bottom: 24 },
                 tooltip: {
                     trigger: 'axis',
                     backgroundColor: 'rgba(10, 22, 40, 0.95)',
                     borderColor: 'rgba(0, 212, 255, 0.3)',
-                    textStyle: { color: '#e8f4ff' },
+                    textStyle: { color: '#e8f4ff', fontSize: 12 },
                     formatter: function(params) {
-                        return params[0].name + '<br/><span style="color:#00d4ff;font-weight:bold;">' + params[0].value.toFixed(1) + '</span>';
+                        return params[0].name + '<br/><span style="color:#00d4ff;font-weight:bold;">' + params[0].value + '</span> 小时';
                     }
                 },
+                dataZoom: [{
+                    type: 'inside',
+                    xAxisIndex: 0,
+                    startValue: 0,
+                    endValue: 13
+                }],
                 xAxis: {
                     type: 'category',
-                    data: ['长沙', '株洲', '湘潭', '衡阳', '邵阳', '岳阳', '常德', '张家界'],
-                    axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.2)' } },
-                    axisLabel: { color: '#4a6a8a', fontSize: 10 }
+                    data: cityData.map(function(d) { return d.name; }),
+                    axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.15)' } },
+                    axisLabel: { color: '#4a6a8a', fontSize: 9, interval: 0, rotate: 45 }
                 },
                 yAxis: {
                     type: 'value',
-                    max: 100,
+                    name: 'h',
+                    nameTextStyle: { color: '#4a6a8a', fontSize: 10 },
                     axisLine: { show: false },
                     axisTick: { show: false },
-                    splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
+                    splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.08)' } },
                     axisLabel: { color: '#4a6a8a', fontSize: 10 }
                 },
                 series: [{
                     type: 'bar',
-                    barWidth: '50%',
+                    barWidth: '55%',
                     itemStyle: {
                         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                             { offset: 0, color: '#00d4ff' },
-                            { offset: 1, color: '#0055aa' }
+                            { offset: 1, color: '#004488' }
                         ]),
-                        borderRadius: [4, 4, 0, 0]
+                        borderRadius: [3, 3, 0, 0]
                     },
-                    data: [89, 85, 86, 82, 78, 84, 83, 80]
+                    emphasis: {
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#33e0ff' },
+                                { offset: 1, color: '#0066bb' }
+                            ])
+                        }
+                    },
+                    data: cityData.map(function(d) { return d.value; })
                 }]
             };
             cityBarChart.setOption(cityBarOption);
 
-            function createBarChart(id, data, colors) {
+            function createAutoChart(id, data, colors) {
                 var chart = echarts.init(document.getElementById(id));
                 var option = {
                     backgroundColor: 'transparent',
-                    grid: { left: 50, right: 20, top: 10, bottom: 30 },
+                    grid: { left: 40, right: 12, top: 24, bottom: 24 },
                     tooltip: {
                         trigger: 'axis',
                         backgroundColor: 'rgba(10, 22, 40, 0.95)',
                         borderColor: 'rgba(0, 212, 255, 0.3)',
-                        textStyle: { color: '#e8f4ff' },
+                        textStyle: { color: '#e8f4ff', fontSize: 12 },
                         formatter: function(params) {
                             var res = params[0].name + '<br/>';
                             params.forEach(function(p) {
-                                res += '<span style="color:' + p.color + ';">●</span> ' + p.seriesName + ': <span style="color:#00d4ff;font-weight:bold;">' + p.value.toFixed(1) + '</span><br/>';
+                                res += '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + p.color + ';margin-right:6px;"></span>' + p.seriesName + ': <span style="color:#00d4ff;font-weight:bold;">' + p.value + '</span><br/>';
                             });
                             return res;
                         }
@@ -524,51 +564,64 @@
                     legend: {
                         top: 0,
                         right: 0,
-                        textStyle: { color: '#7aa2cc', fontSize: 10 },
-                        itemWidth: 10,
-                        itemHeight: 10
+                        textStyle: { color: '#7aa2cc', fontSize: 9 },
+                        itemWidth: 8,
+                        itemHeight: 8,
+                        itemGap: 8
                     },
                     xAxis: {
                         type: 'category',
-                        data: ['长沙', '株洲', '湘潭', '衡阳', '邵阳', '岳阳', '常德', '张家界'],
-                        axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.2)' } },
-                        axisLabel: { color: '#4a6a8a', fontSize: 10 }
+                        data: data.categories,
+                        axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.15)' } },
+                        axisLabel: { color: '#4a6a8a', fontSize: 9 }
                     },
                     yAxis: {
                         type: 'value',
-                        max: 100,
                         axisLine: { show: false },
                         axisTick: { show: false },
-                        splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.1)' } },
-                        axisLabel: { color: '#4a6a8a', fontSize: 10 }
+                        splitLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.08)' } },
+                        axisLabel: { color: '#4a6a8a', fontSize: 9 }
                     },
                     series: [
                         {
-                            name: '电信',
+                            name: '路由自智',
                             type: 'bar',
-                            barWidth: '30%',
-                            barGap: '20%',
+                            barWidth: '22%',
+                            barGap: '15%',
                             itemStyle: {
                                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                                     { offset: 0, color: colors[0] },
-                                    { offset: 1, color: colors[0] + '66' }
+                                    { offset: 1, color: colors[0] + '44' }
                                 ]),
-                                borderRadius: [3, 3, 0, 0]
+                                borderRadius: [2, 2, 0, 0]
                             },
-                            data: data[0]
+                            data: data.route
                         },
                         {
-                            name: '移动',
+                            name: 'DNS自智',
                             type: 'bar',
-                            barWidth: '30%',
+                            barWidth: '22%',
                             itemStyle: {
                                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                                     { offset: 0, color: colors[1] },
-                                    { offset: 1, color: colors[1] + '66' }
+                                    { offset: 1, color: colors[1] + '44' }
                                 ]),
-                                borderRadius: [3, 3, 0, 0]
+                                borderRadius: [2, 2, 0, 0]
                             },
-                            data: data[1]
+                            data: data.dns
+                        },
+                        {
+                            name: 'QoS自智',
+                            type: 'bar',
+                            barWidth: '22%',
+                            itemStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                    { offset: 0, color: colors[2] },
+                                    { offset: 1, color: colors[2] + '44' }
+                                ]),
+                                borderRadius: [2, 2, 0, 0]
+                            },
+                            data: data.qos
                         }
                     ]
                 };
@@ -576,25 +629,35 @@
                 return chart;
             }
 
-            var webBarChart = createBarChart('webBarChart',
-                [[92, 88, 87, 85, 80, 84, 83, 81], [91, 87, 86, 84, 79, 83, 82, 80]],
-                ['#00d4ff', '#a855f7']);
+            var dailyChart = createAutoChart('dailyChart', {
+                categories: ['00-04', '04-08', '08-12', '12-16', '16-20', '20-24'],
+                route: [12, 8, 35, 42, 38, 25],
+                dns: [5, 3, 18, 22, 20, 12],
+                qos: [3, 2, 10, 15, 12, 8]
+            }, ['#00d4ff', '#a855f7', '#00ff88']);
 
-            var videoBarChart = createBarChart('videoBarChart',
-                [[95, 92, 91, 89, 85, 90, 88, 86], [94, 91, 90, 88, 84, 89, 87, 85]],
-                ['#00d4ff', '#a855f7']);
+            var weeklyChart = createAutoChart('weeklyChart', {
+                categories: ['05-03', '05-10', '05-17', '05-24', '05-31'],
+                route: [78, 95, 88, 45, 38],
+                dns: [38, 52, 45, 22, 18],
+                qos: [25, 35, 30, 15, 12]
+            }, ['#00d4ff', '#a855f7', '#00ff88']);
 
-            var gameBarChart = createBarChart('gameBarChart',
-                [[97, 94, 93, 91, 87, 92, 90, 88], [96, 93, 92, 90, 86, 91, 89, 87]],
-                ['#00d4ff', '#a855f7']);
+            var monthlyChart = createAutoChart('monthlyChart', {
+                categories: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                route: [320, 285, 350, 310, 295, 268],
+                dns: [165, 148, 180, 158, 152, 138],
+                qos: [110, 98, 125, 105, 100, 88]
+            }, ['#00d4ff', '#a855f7', '#00ff88']);
 
             window.addEventListener('resize', function() {
                 trendChart.resize();
                 probePieChart.resize();
                 cityBarChart.resize();
-                webBarChart.resize();
-                videoBarChart.resize();
-                gameBarChart.resize();
+                dailyChart.resize();
+                weeklyChart.resize();
+                monthlyChart.resize();
+                hunanMapChart.resize();
             });
         });
     </script>
